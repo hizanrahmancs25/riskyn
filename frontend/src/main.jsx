@@ -38,8 +38,8 @@ function ProcessDialog({ process, onClose }) {
     dialog.showModal();
     return () => dialog.close();
   }, []);
-  return <dialog ref={ref} aria-labelledby="detail-title" onClose={onClose} className="detail-dialog">
-    <div className="section-heading"><p className="eyebrow">Demo process detail</p><button autoFocus className="secondary" onClick={onClose}>Close ×</button></div>
+  return <dialog ref={ref} aria-labelledby="detail-title" onClose={(event) => { if (!event.currentTarget.open) onClose(); }} className="detail-dialog">
+    <div className="section-heading"><p className="eyebrow">Demo process detail</p><button autoFocus className="secondary" onClick={() => ref.current.close()}>Close ×</button></div>
     <h2 id="detail-title">{process.name}</h2><p className="muted mb-6">{process.owner}</p>
     <dl className="detail-list"><div><dt>Linked assets</dt><dd>{process.assets}</dd></div><div><dt>Illustrative EAL</dt><dd>{inr(process.eal_inr)}</dd></div><div><dt>Illustrative process VaR₉₅</dt><dd>{inr(process.var95_inr)}</dd></div></dl>
     <p className="callout mt-6">These are presentation fixtures. No calculation inputs, attack graphs, or assessed findings are available.</p>
@@ -153,4 +153,11 @@ function App() {
         {error && <div className="error-banner" role="alert"><p>{error}{data && ' Previously loaded demo data remains visible.'}</p><button className="secondary" onClick={load} disabled={loading}>Retry</button></div>}
         {loading && !data && <div className="panel empty" role="status">Loading your example workspace…</div>}
         {data && <div aria-busy={loading}>{view === 'overview' && <Overview data={data} onSelect={setProcess} onNavigate={setView} />}{view === 'processes' && <Processes data={data} onSelect={setProcess} />}{view === 'investments' && <Investments data={data} />}{view === 'integrations' && <Integrations data={data} />}</div>}
-        <footer><span>Risk
+        <footer><span>Riskyn · Built for business perspective</span><span>{data ? `Fixture snapshot: ${new Date(data.snapshot_at).toLocaleDateString('en-IN', { timeZone: 'UTC' })}` : 'Demo application'}</span></footer>
+      </main>
+    </div>
+    {process && <ProcessDialog process={process} onClose={() => setProcess(null)} />}
+  </div>;
+}
+
+createRoot(document.getElementById('root')).render(<React.StrictMode><App /></React.StrictMode>);
