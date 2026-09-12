@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import {
   Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
+import { demoSnapshot } from './demoData.js';
 import { budgetSummary, inr } from './format.js';
 import './styles.css';
 
@@ -110,7 +111,6 @@ function Integrations({ data }) {
   return <section className="panel"><p className="eyebrow">Ready for the next layer</p><h2>Integration workspace</h2><p className="muted mt-2 mb-6">The interface is connected to the demo API. Domain engines and external services are not implemented.</p>
     <div className="integration-grid">{data.capabilities.map((item) => <article className="integration" key={item.name}><span className="process-icon" aria-hidden="true">⊞</span><h3>{item.name}</h3><span className="chip">{item.status}</span></article>)}</div>
     <div className="callout mt-6">Compliance clauses and AI answers are intentionally absent until verified mappings and a real provider are connected.</div>
-    <a className="text-button inline-block mt-6" href="/docs" target="_blank" rel="noreferrer">Explore FastAPI documentation ↗</a>
   </section>;
 }
 
@@ -120,26 +120,13 @@ function App() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [process, setProcess] = useState(null);
-  const controller = useRef(null);
   async function load() {
-    controller.current?.abort();
-    const request = new AbortController();
-    controller.current = request;
     setLoading(true);
     setError('');
-    try {
-      const response = await fetch('/api/dashboard', { signal: request.signal });
-      if (!response.ok) throw new Error(`API returned ${response.status}`);
-      const snapshot = await response.json();
-      if (snapshot.mode !== 'demo' || !Array.isArray(snapshot.processes) || !Array.isArray(snapshot.trend) || !Array.isArray(snapshot.investments) || !Array.isArray(snapshot.capabilities) || !snapshot.summary) throw new Error('Unexpected dashboard response');
-      if (!request.signal.aborted) setData(snapshot);
-    } catch (failure) {
-      if (failure.name !== 'AbortError') setError('Unable to load the dashboard. Check that the FastAPI service is running, then retry.');
-    } finally {
-      if (!request.signal.aborted) setLoading(false);
-    }
+    setData(demoSnapshot);
+    setLoading(false);
   }
-  useEffect(() => { load(); return () => controller.current?.abort(); }, []);
+  useEffect(() => { load(); }, []);
   const active = views.find((item) => item.id === view);
   return <div className="app-shell"><a href="#main" className="skip-link">Skip to content</a>
     <aside className="sidebar"><a className="brand" href="#main" onClick={() => setView('overview')}><span className="brand-icon" aria-hidden="true">r</span>riskyn<span className="brand-dot">.</span></a>

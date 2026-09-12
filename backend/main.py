@@ -1,7 +1,9 @@
 from copy import deepcopy
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.demo import DEMO_SNAPSHOT
@@ -10,6 +12,14 @@ app = FastAPI(
     title="Riskyn application shell",
     description="Presentation-only demo API. Monetary values are fixed illustrative fixtures, not calculated risk estimates.",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")],
+    allow_origin_regex=r"https://[a-zA-Z0-9-]+\.vercel\.app",
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
